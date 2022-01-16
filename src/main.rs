@@ -13,11 +13,7 @@ fn main() -> io::Result<()> {
         None => return Ok(()), // current dir is not a git repo
     };
 
-    println!(
-        " %F{{blue}}(%F{{red}}{}%F{{blue}})%f{}",
-        branch,
-        if is_dirty() { "💩" } else { "" }
-    );
+    println!("{}{}", branch, if is_dirty() { " 💩" } else { "" });
 
     Ok(())
 }
