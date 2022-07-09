@@ -9,3 +9,4 @@ description = "Generate a zsh prompt that prints the current branch name with co
 [profile.release]
 codegen-units = 1
 lto = true
+strip = true
