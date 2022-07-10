@@ -9,7 +9,21 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_linux:
+  create_release:
+    if: env.GITHUB_REF
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.GITHUB_REF }}
+          release_name: ${{ env.GITHUB_REF }}
+
+  upload_linux_artifacts:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -45,17 +59,17 @@ jobs:
           command: build
           args: --release --target ${{ matrix.target }}
           use-cross: ${{ ! startsWith(matrix.target, 'x86_64-') }}
-      # - name: Strip binary
-      #   run: |
-      #     sudo apt install -y --no-install-recommends binutils
-      #     strip --strip-all target/${{ matrix.target }}/release/gitprompt
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: gitprompt-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/gitprompt
+          upload_url: ${{ jobs.create_release.outputs.artifact_upload_url }}
+          asset_name: gitprompt-${{ matrix.target }}
+          asset_path: target/${{ matrix.target }}/release/gitprompt
+          asset_content_type: application/octet-stream
 
-  build_mac:
+  upload_mac_artifacts:
     runs-on: macos-latest
     strategy:
       matrix:
@@ -76,15 +90,17 @@ jobs:
         with:
           command: build
           args: --release --target ${{ matrix.target }}
-      # - name: Strip binary
-      #   run: strip -s target/${{ matrix.target }}/release/gitprompt
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: gitprompt-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/gitprompt
+          upload_url: ${{ jobs.create_release.outputs.artifact_upload_url }}
+          asset_name: gitprompt-${{ matrix.target }}
+          asset_path: target/${{ matrix.target }}/release/gitprompt
+          asset_content_type: application/octet-stream
 
-  build_windows:
+  upload_windows_artifacts:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -106,7 +122,11 @@ jobs:
           command: build
           args: --release --target ${{ matrix.target }}
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: gitprompt-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/gitprompt
+          upload_url: ${{ jobs.create_release.outputs.artifact_upload_url }}
+          asset_name: gitprompt-${{ matrix.target }}
+          asset_path: target/${{ matrix.target }}/release/gitprompt
+          asset_content_type: application/octet-stream
