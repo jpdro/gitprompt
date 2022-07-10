@@ -102,36 +102,3 @@ jobs:
           asset_name: gitprompt-${{ matrix.target }}
           asset_path: target/${{ matrix.target }}/release/gitprompt
           asset_content_type: application/octet-stream
-
-  upload_windows_assets:
-    runs-on: windows-latest
-    needs:
-      - get_release_asset_upload_url
-    strategy:
-      matrix:
-        target:
-          - aarch64-pc-windows-msvc
-          - x86_64-pc-windows-msvc
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-      - name: Build Windows release binary
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target ${{ matrix.target }}
-      - name: Upload binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.get_release_asset_upload_url.outputs.asset_upload_url }}
-          asset_name: gitprompt-${{ matrix.target }}
-          asset_path: target/${{ matrix.target }}/release/gitprompt
-          asset_content_type: application/octet-stream
