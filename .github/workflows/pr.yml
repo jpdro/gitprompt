@@ -1,4 +1,4 @@
-name: Test
+name: PR
 
 on:
   pull_request:
@@ -8,7 +8,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  should_build_linux:
+  build_linux:
+    name: Verify that gitprompt builds on various linux targets
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -45,7 +46,8 @@ jobs:
           args: --release --target ${{ matrix.target }}
           use-cross: ${{ ! startsWith(matrix.target, 'x86_64-') }}
 
-  should_build_mac:
+  build_mac:
+    name: Verify gitprompt builds on macOS
     runs-on: macos-latest
     strategy:
       matrix:
@@ -67,7 +69,8 @@ jobs:
           command: build
           args: --release --target ${{ matrix.target }}
 
-  should_lint:
+  lint:
+    name: Run clippy and verify code is formatted
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
