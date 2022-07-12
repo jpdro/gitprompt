@@ -6,8 +6,24 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DOCKER_BUILDKIT: "1"
 
 jobs:
+  build_devcontainer:
+    name: Verify that the devcontainer image builds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Build devcontainer
+        run: |
+          docker version
+          cd .devcontainer
+          docker image build --pull --platform=linux/amd64 --tag=gitprompt:latest - < Dockerfile
+
   build_linux:
     name: Verify that gitprompt builds on various linux targets
     runs-on: ubuntu-latest
@@ -20,8 +36,10 @@ jobs:
           # - riscv64gc-unknown-linux-musl  # TODO: uncomment when rust stdlib is available for riscv-musl
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
       - name: Install Rust
@@ -54,8 +72,10 @@ jobs:
         target:
           - aarch64-apple-darwin
           - x86_64-apple-darwin
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
       - name: Install Rust
@@ -72,8 +92,10 @@ jobs:
   lint:
     name: Run clippy and verify code is formatted
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
       - name: Install Rust
